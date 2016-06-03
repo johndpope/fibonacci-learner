@@ -2,11 +2,13 @@
 import numpy as np
 import tensorflow as tf 
 
+# GENERATE THE DATA
+
 # Generate a big fibonnaci sequence to 
 N_TERMS = 100
-fib_ref = np.empty(N_TERMS, dtype=np.int64)
-fib_ref[0] = 0
-fib_ref[1] = 1
+fib_ref = np.empty(N_TERMS, dtype=np.float64)
+fib_ref[0] = 0.0
+fib_ref[1] = 1.0
 
 for i in xrange(2, N_TERMS):
     fib_ref[i] = fib_ref[i-1] + fib_ref[i-2]
@@ -14,7 +16,7 @@ for i in xrange(2, N_TERMS):
 # Generate a data set using slices of the reference data set of the same length
 WINDOW_SIZE = 20
 n_all_seqs = N_TERMS - WINDOW_SIZE + 1
-all_seqs = np.empty([n_all_seqs, WINDOW_SIZE], dtype=np.int64)
+all_seqs = np.empty([n_all_seqs, WINDOW_SIZE], dtype=np.float64)
 
 for i in xrange(0, n_all_seqs):
     for j in xrange(0, WINDOW_SIZE):
@@ -24,8 +26,8 @@ for i in xrange(0, n_all_seqs):
 TEST_SPLIT = 0.2
 n_test_seqs = int(n_all_seqs * TEST_SPLIT)
 n_train_seqs = n_all_seqs - n_test_seqs
-test_seqs = np.empty([n_test_seqs, WINDOW_SIZE], dtype=np.int64)
-train_seqs = np.empty([n_train_seqs, WINDOW_SIZE], dtype=np.int64)
+test_seqs = np.empty([n_test_seqs, WINDOW_SIZE], dtype=np.float64)
+train_seqs = np.empty([n_train_seqs, WINDOW_SIZE], dtype=np.float64)
 
 test_indices = np.random.choice(xrange(0, n_all_seqs), n_test_seqs, replace=False)
 train_i = 0
@@ -38,3 +40,11 @@ for i in xrange(0, n_all_seqs):
     else:
         np.copyto(train_seqs[train_i], all_seqs[i])
         train_i += 1
+
+print fib_ref[99]
+
+# BUILD THE COMPUTATION GRAPH TO DEFINE THE MODEL
+
+# TRAIN THE MODEL
+
+# EVALUATE THE MODEL
