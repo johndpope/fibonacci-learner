@@ -4,14 +4,17 @@ import tensorflow as tf
 
 # GENERATE THE DATA
 
-# Generate a big fibonnaci sequence to 
+# Generate a big fibonacci sequence to 
 N_TERMS = 100
 fib_ref = np.empty(N_TERMS, dtype=np.float64)
-fib_ref[0] = 0.0
+fib_ref[0] = 1.0
 fib_ref[1] = 1.0
 
 for i in xrange(2, N_TERMS):
     fib_ref[i] = fib_ref[i-1] + fib_ref[i-2]
+
+# Take log of fibonacci and see how well an the model approximates
+log_fib_ref = np.log2(fib_ref)
 
 # Generate a data set using slices of the reference data set of the same length
 WINDOW_SIZE = 20
@@ -20,7 +23,7 @@ all_seqs = np.empty([n_all_seqs, WINDOW_SIZE], dtype=np.float64)
 
 for i in xrange(0, n_all_seqs):
     for j in xrange(0, WINDOW_SIZE):
-        all_seqs[i][j] = fib_ref[i+j]
+        all_seqs[i][j] = log_fib_ref[i+j]
 
 # Create training and test sets by randomly sampling the whole data set
 TEST_SPLIT = 0.2
@@ -41,7 +44,8 @@ for i in xrange(0, n_all_seqs):
         np.copyto(train_seqs[train_i], all_seqs[i])
         train_i += 1
 
-print fib_ref[99]
+#print log_fib_ref
+#print np.power(2.0, log_fib_ref)
 
 # BUILD THE COMPUTATION GRAPH TO DEFINE THE MODEL
 
