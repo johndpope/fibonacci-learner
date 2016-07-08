@@ -1,8 +1,9 @@
 #!/usr/bin/python
 import numpy as np
-import tensorflow as tf 
 
+################################################################################
 # GENERATE THE DATA
+################################################################################
 
 # Generate a big fibonacci sequence to 
 N_TERMS = 500
@@ -41,8 +42,3 @@ for i in xrange(0, n_all_seqs):
         np.copyto(train_seqs[train_i], all_seqs[i])
         train_i += 1
 
-# BUILD THE COMPUTATION GRAPH TO DEFINE THE MODEL
-
-# TRAIN THE MODEL
-
-# EVALUATE THE MODEL
