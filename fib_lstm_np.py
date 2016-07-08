@@ -5,6 +5,8 @@ import numpy as np
 # GENERATE THE DATA
 ################################################################################
 
+np.random.seed()
+
 # Generate a big fibonacci sequence to 
 N_TERMS = 500
 fib_ref = np.empty(N_TERMS, dtype=np.float64)
@@ -16,19 +18,23 @@ for i in xrange(2, N_TERMS):
 
 # Generate a data set using slices of the reference data set of the same length
 WINDOW_SIZE = 25
-n_all_seqs = N_TERMS - WINDOW_SIZE + 1
-all_seqs = np.empty([n_all_seqs, WINDOW_SIZE], dtype=np.float64)
+n_all_seqs = N_TERMS - WINDOW_SIZE
+all_seqs = np.empty([n_all_seqs, 2, WINDOW_SIZE], dtype=np.float64)
+
+# X data = all_seqs[sequence][0][t]
+# Y data = all_seqs[sequence][1][t+1]
 
 for i in xrange(0, n_all_seqs):
     for j in xrange(0, WINDOW_SIZE):
-        all_seqs[i][j] = fib_ref[i+j]
+        all_seqs[i][0][j] = fib_ref[i+j]
+        all_seqs[i][1][j] = fib_ref[i+j+1]
 
 # Create training and test sets by randomly sampling the whole data set
 TEST_SPLIT = 0.2
 n_test_seqs = int(n_all_seqs * TEST_SPLIT)
 n_train_seqs = n_all_seqs - n_test_seqs
-test_seqs = np.empty([n_test_seqs, WINDOW_SIZE], dtype=np.float32)
-train_seqs = np.empty([n_train_seqs, WINDOW_SIZE], dtype=np.float64)
+test_seqs = np.empty([n_test_seqs, 2, WINDOW_SIZE], dtype=np.float32)
+train_seqs = np.empty([n_train_seqs, 2, WINDOW_SIZE], dtype=np.float64)
 
 test_indices = np.random.choice(xrange(0, n_all_seqs), n_test_seqs, replace=False)
 train_i = 0
@@ -42,3 +48,14 @@ for i in xrange(0, n_all_seqs):
         np.copyto(train_seqs[train_i], all_seqs[i])
         train_i += 1
 
+################################################################################
+# DEFINE THE MODEL
+################################################################################
+
+################################################################################
+# TRAIN THE MODEL
+################################################################################
+
+################################################################################
+# TEST THE MODEL
+################################################################################
