@@ -1,5 +1,6 @@
 #!/usr/bin/python
 import numpy as np
+import tensorflow as tf 
 
 ################################################################################
 # GENERATE THE DATA
@@ -62,8 +63,12 @@ class LSTMcell:
 
     def __init__ (self):
         # States
-        self.h_t = 2*np.random.random() # hypothesis output
+        self.h_t = 2*np.random.random() # hidden state
         self.c_t = 2*np.random.random() # internal memory
+        self.a_t = 2*np.random.random() # candidate hidden state
+        self.i_t = 2*np.random.random() # input
+        self.f_t = 2*np.random.random() # forget
+        self.o_t = 2*np.random.random() # output
 
         # Parameters
         self.W_a = 2*np.random.random([1,2])
@@ -76,10 +81,10 @@ class LSTMcell:
         self.U_o = 2*np.random.random()
 
     def forward_step (self, x_t):
-        a_t = np.tanh( np.dot(self.W_c, x_t) + np.dot(self.U_c, self.h_t) )
-        i_t = sigmoid( np.dot(self.W_i, x_t) + np.dot(self.U_i, self.h_t) )
-        f_t = sigmoid( np.dot(self.W_f, x_t) + np.dot(self.U_f, self.h_t) )
-        o_t = sigmoid( np.dot(self.W_o, x_t) + np.dot(self.U_o, self.h_t) )
+        self.a_t = np.tanh( np.dot(self.W_c, x_t) + np.dot(self.U_c, self.h_t) )
+        self.i_t = sigmoid( np.dot(self.W_i, x_t) + np.dot(self.U_i, self.h_t) )
+        self.f_t = sigmoid( np.dot(self.W_f, x_t) + np.dot(self.U_f, self.h_t) )
+        self.o_t = sigmoid( np.dot(self.W_o, x_t) + np.dot(self.U_o, self.h_t) )
 
         self.c_t = (i_t * a_t) + (f_t * self.c_t)
         self.h_t = o_t * np.tanh(self.c_t)
