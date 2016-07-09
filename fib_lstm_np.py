@@ -52,6 +52,44 @@ for i in xrange(0, n_all_seqs):
 # DEFINE THE MODEL
 ################################################################################
 
+def sigmoid (x):
+    return 1.0 / (1.0 + np.exp(-x))
+
+def dtanh_dx (x):
+    return 1.0 - np.power(np.tanh(x), 2)
+
+class LSTMcell:
+
+    def __init__ (self):
+        # States
+        self.h_t = 2*np.random.random() # hypothesis output
+        self.c_t = 2*np.random.random() # internal memory
+
+        # Parameters
+        self.W_a = 2*np.random.random([1,2])
+        self.W_i = 2*np.random.random([1,2])
+        self.W_f = 2*np.random.random([1,2])
+        self.W_o = 2*np.random.random([1,2])
+        self.U_a = 2*np.random.random()
+        self.U_i = 2*np.random.random()
+        self.U_f = 2*np.random.random()
+        self.U_o = 2*np.random.random()
+
+    def forward_step (self, x_t):
+        a_t = np.tanh( np.dot(self.W_c, x_t) + np.dot(self.U_c, self.h_t) )
+        i_t = sigmoid( np.dot(self.W_i, x_t) + np.dot(self.U_i, self.h_t) )
+        f_t = sigmoid( np.dot(self.W_f, x_t) + np.dot(self.U_f, self.h_t) )
+        o_t = sigmoid( np.dot(self.W_o, x_t) + np.dot(self.U_o, self.h_t) )
+
+        self.c_t = (i_t * a_t) + (f_t * self.c_t)
+        self.h_t = o_t * np.tanh(self.c_t)
+
+    def backward_step (self):
+        pass
+
+    def train (self, dataX, dataY):
+        pass
+
 ################################################################################
 # TRAIN THE MODEL
 ################################################################################
