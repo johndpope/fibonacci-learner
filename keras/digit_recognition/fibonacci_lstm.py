@@ -37,7 +37,7 @@ for i in xrange(2, N_FIB_TERMS):
 
 # Generate a data set using slices of the reference data set of the same length
 n_all_sequences = N_FIB_TERMS - (WINDOW_SIZE+1)
-X_all = np.empty([n_sall_sequences, WINDOW_SIZE, 2*N_DIGITS], dtype=np.float64)
+X_all = np.empty([n_all_sequences, WINDOW_SIZE, 2*N_DIGITS], dtype=np.float64)
 y_all = np.empty([n_all_sequences, WINDOW_SIZE, 1*N_DIGITS], dtype=np.float64)
 
 for i in xrange(n_all_sequences):
@@ -69,13 +69,13 @@ y_test = y_all[~test_split_mask]
 # Define and train the model
 model = Sequential()
 dropout = 0.0
-model.add(LSTM(150, return_sequences=True, input_shape=(WINDOW_SIZE,2*N_DIGITS)))
+model.add(Bidirectional(LSTM(150, return_sequences=True), input_shape=(WINDOW_SIZE,2*N_DIGITS)))
 model.add(TimeDistributed(Dense(N_DIGITS, activation='relu')))
 #model.add(Dropout(dropout))
-model.compile(loss='mean_squared_error', optimizer='adam', metrics=['accuracy'])
+model.compile(loss='categorical_crossentropy', optimizer='adam', metrics=['accuracy'])
 print model.summary()
 
-model.fit(X_train, y_train, nb_epoch=10, batch_size=25)
+model.fit(X_train, y_train, nb_epoch=500, batch_size=50)
 
 scores = model.evaluate(X_test, y_test, verbose=0)
 print "Accuracy: %.2f%%" % (scores[1]*100)
