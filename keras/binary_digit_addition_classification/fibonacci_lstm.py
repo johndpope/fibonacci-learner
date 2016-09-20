@@ -101,11 +101,11 @@ Y_test = Y_train_all[~test_split_mask]
 # Define and train the model
 model = Sequential()
 dropout = 0.33
-model.add(LSTM(150, return_sequences=True, input_shape=(MAX_BITS, 2)))
+model.add(LSTM(10, return_sequences=True, input_shape=(MAX_BITS,), input_dim=2))
+#model.add(LSTM(150, return_sequences=True, input_shape=(MAX_BITS,2)))
 model.add(Dropout(dropout))
 #model.add(LSTM(150, return_sequences=True))
 model.add(TimeDistributed(Dense(1, activation='sigmoid')))
-
 opt = Adam(lr=0.01)
 model.compile(loss='binary_crossentropy', optimizer=opt, metrics=['accuracy'])
 print model.summary()
