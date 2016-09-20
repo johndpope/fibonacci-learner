@@ -1,26 +1,29 @@
 #!/usr/bin/python
-from keras.preprocessing import sequence
+# -*- coding: UTF-8 -*-
+################################################################################
+# fibonacci_lstm.py
+
+# The model takes 2 decimal numbers and predicts their sum.
+# - Samples are modelled as sequences of 2 bits.
+# - X vector has 2 bits for frame, one per operand.
+# - Y vector has one bit
+
+# Model is trained heavily on first 92 Fibonacci terms to ensure it can generate
+# the Fibonacci sequence.
+
+# Gets to 99% validation accuracy after 10 epochs, 100% train and test accuracy.
+################################################################################
+
 from keras.models import load_model
 from keras.models import Sequential
-from keras.layers import LSTM, GRU
+from keras.layers import LSTM
 from keras.layers import Dense
-from keras.layers.core import Activation
-from keras.regularizers import l2
-from keras.layers.wrappers import Bidirectional
 from keras.layers.wrappers import TimeDistributed
 from keras.layers.core import Dropout
 from keras.optimizers import Adam
 import numpy as np
 import pandas as pd
 import sys
-
-# The model takes 2 numbers and predicts their sum
-# Samples are modelled as 2 sequences of vectors
-# X vector has 2 vectors per frame (one for each operand)
-# vector is a one-hot embedding of the bit (one or zero)
-# seems to get to 96% after 10 epochs
-
-################################################################################
 
 np.random.seed(42)
 
@@ -51,18 +54,27 @@ def encode_decimal (n, n_bits=MAX_BITS):
         x[i] = int(rev_bit_string[i])
     return x
 
-def decode_bits (bit_array):
+def make_bits_from_sigmoid_out (arr):
+    bit_array = np.zeros(arr.shape, dtype=np.int64)
+    for i in xrange(arr.shape[0]):
+        if arr[i] >= 0.5:
+            bit_array[i] = 1
+        else:
+            bit_array[i] = 0
+    return bit_array
+
+def decode_bits (arr):
     rev_bit_string = ""
-    for b in bit_array:
-        rev_bit_string += str(b)
-    return int(rev_bit_string[::-1], 2)
+    for i in xrange(arr.shape[0]):
+        rev_bit_string += str(arr[i][0])
+    bit_string = rev_bit_string[::-1]
+    return int(bit_string, 2)
 
 # Read the fibonacci series into memory
 fibonacci_ref = pd.read_csv("fibonacci_sequence.csv", header=None)
 
 # Generate the dataset
 # Duplicate each sample, with t-1 and t-2 terms swapped 
-# TODO: does this have an affect?
 X_fib_all = np.zeros([2*N_3_WINDOWS, MAX_BITS, 2], dtype=np.int64)
 Y_fib_all = np.zeros([2*N_3_WINDOWS, MAX_BITS, 1], dtype=np.int64)
 
@@ -121,7 +133,7 @@ model.compile(loss='binary_crossentropy', optimizer=opt, metrics=['accuracy'])
 
 print model.summary()
 
-model.fit(X_train, Y_train, nb_epoch=10, batch_size=100)
+model.fit(X_train, Y_train, nb_epoch=10, batch_size=100, verbose=2)
 
 # Evaluate the model
 print "~~~ Test Set Scores ~~~"
@@ -135,3 +147,46 @@ if SAVE_MODEL_FILEPATH:
     model.save(SAVE_MODEL_FILEPATH)
 
 # Use the model for prediction
+def predict_sum (x1, x2):
+    x1_encoded = encode_decimal(x1)
+    x2_encoded = encode_decimal(x2)
+    X = np.hstack((x1_encoded, x2_encoded)).reshape((1,x1_encoded.shape[0],2))
+    pred_encoded_raw = model.predict(X, batch_size=1)[0]
+    pred_encoded = make_bits_from_sigmoid_out(pred_encoded_raw)
+    return decode_bits(pred_encoded)
+
+#print predict_sum(1,1)
+
+# Use the model for generate fibonacci sequence
+def generate_fibonacci (n):
+    if n > 92:
+        print "ERROR: only first 92 fibs supported because of int64 limits! Sorry :("
+        return []
+
+    fibs = [1,1]
+    for i in xrange(len(fibs), n):
+        fibs.append(predict_sum(fibs[i-1], fibs[i-2]))
+
+    return fibs
+
+#print generate_fibonacci(10)
+
+print "~~~ Generating Fibonacci Terms ~~~"
+while True:
+    print "\nFirst `how many` terms? "
+    try:
+        raw_s = raw_input().strip()
+    except EOFError as e:
+        sys.exit(0)
+
+    try:
+        n = int(raw_s)
+    except ValueError as e:
+        print "Please enter an integer!"
+        continue
+
+    fibs = generate_fibonacci(n)
+    if fibs:
+        print ""
+        for f in fibs:
+            print f
